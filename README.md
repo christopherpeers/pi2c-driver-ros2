@@ -2,13 +2,19 @@
 
 The custom I2C device has one register at an address 0x42 that can only be written to with values in the range 0 to 15.  The address can be changed by modifying the code.
 
-## Topic and message
+## ROS topic and message
 
 The topic used is `/pi2c`.
 
 The message used is `std_msgs/msgs/UInt8`.  Values in the range 0 to 15 are sent to the device.  Other values are ignored.
 
-## Testing
+## Installation
+
+This driver using the Python SMBUS package to interface with the I2C on the RPi.  Install it using:
+
+```bash
+sudo apt install python3-smbus
+```
 
 Clone this repo in a ROS2 workspace and then build and run.  See below for example commands:
 
@@ -37,6 +43,8 @@ $ ros2 topic list
 /pi2c
 /rosout
 ```
+
+## Testing
 
 To send a command to the I2C device from the command line use this command:
 
