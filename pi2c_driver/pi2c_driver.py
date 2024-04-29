@@ -38,8 +38,6 @@ class I2CDriver(Node):
     def __init__(self):
         # Set up node.
         super().__init__("pi2c")
-        # Setup up I2C bus.
-        self.__i2c_bus = smbus2.SMBus(I2C_BUS)
         # Set up subscriber
         self.imu_calibrate_server = self.create_subscription(
             UInt8, "pi2c", self.callback_send_i2c_message, 10
@@ -53,7 +51,15 @@ class I2CDriver(Node):
                 value.data,
             )
         else:
-            self.__i2c_bus.write_byte(I2C_ADDRESS, value.data)
+            try:
+                with smbus2.SMBus(I2C_BUS) as bus:
+                    bus.write_byte(I2C_ADDRESS, value.data)
+            except Exception as e:
+                self.get_logger().error(
+                    "Failed to write value %d to I2C device: %s",
+                    value.data,
+                    str(e),
+                )
 
 
 def main(args=None):
