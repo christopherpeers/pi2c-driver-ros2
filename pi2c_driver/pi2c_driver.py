@@ -42,18 +42,25 @@ class I2CDriver(Node):
         self.imu_calibrate_server = self.create_subscription(
             UInt8, "pi2c", self.callback_send_i2c_message, 10
         )
-        self.get_logger().info("PI2C started...")
+        info_string = "PI2C started using address 0x{:02X} on I2C bus {}".format(
+            I2C_ADDRESS, I2C_BUS
+        )
+        self.get_logger().info(info_string)
 
     def callback_send_i2c_message(self, value: UInt8):
         if value.data > MAX_VALUE:
-            self.get_logger().warn(
-                "Value %d exceeds maximum value of %d. Ignoring...",
-                value.data,
+            warning_string = "Value {} exceeds maximum value of {}. Ignoring...".format(
+                value.data, MAX_VALUE
             )
+            self.get_logger().warn(warning_string)
         else:
             try:
                 with smbus2.SMBus(I2C_BUS) as bus:
                     bus.write_byte(I2C_ADDRESS, value.data)
+                    info_string = "Written {} to address 0x{:02X}".format(
+                        value.data, I2C_ADDRESS
+                    )
+                    self.get_logger().info(info_string)
             except Exception as e:
                 error_string = "Failed to write value {} to I2C device: {}".format(
                     value.data, str(e)
