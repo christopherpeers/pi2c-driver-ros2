@@ -21,29 +21,40 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-
+import smbus2
 import rclpy
 from rclpy.node import Node
+from std_msgs.msg import UInt8
 
-from std_msgs.msg import Int8
-# https://github.com/adafruit/Adafruit_Python_Extended_Bus
-from adafruit_extended_bus import ExtendedI2C as I2C
+# Default on RPi is /dev/i2c-1
+I2C_BUS = 1
+# I2C address of the device.
+I2C_ADDRESS = 0x42
+# Maximum value to be written to the I2C device.
+MAX_VALUE = 15
 
 
 class I2CDriver(Node):
     def __init__(self):
         # Set up node.
         super().__init__("pi2c")
-        # Setu up I2C bus.  Device is /dev/i2c-1
-        self.__i2c = I2C(1)
+        # Setup up I2C bus.
+        self.__i2c_bus = smbus2.SMBus(I2C_BUS)
         # Set up subscriber
         self.imu_calibrate_server = self.create_subscription(
-            Int8, "pi2c", self.callback_send_i2c_message, 10
+            UInt8, "pi2c", self.callback_send_i2c_message, 10
         )
         self.get_logger().info("PI2C started...")
 
-    def callback_send_i2c_message(self, value: Int8):
-        self.__i2c.writeto(0x04, bytes([value]))
+    def callback_send_i2c_message(self, value: UInt8):
+        if value.data > MAX_VALUE:
+            self.get_logger().warn(
+                "Value %d exceeds maximum value of %d. Ignoring...",
+                value.data,
+            )
+        else:
+            self.__i2c_bus.write_byte(I2C_ADDRESS, value.data)
+
 
 def main(args=None):
     rclpy.init(args=args)

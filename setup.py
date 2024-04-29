@@ -24,7 +24,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            "pi2c_node = pi2c_driver.driver:main",
+            "pi2c_driver_exec = pi2c_driver.pi2c_driver:main",
         ],
     },
 )
