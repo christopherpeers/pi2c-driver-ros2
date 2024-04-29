@@ -55,11 +55,10 @@ class I2CDriver(Node):
                 with smbus2.SMBus(I2C_BUS) as bus:
                     bus.write_byte(I2C_ADDRESS, value.data)
             except Exception as e:
-                self.get_logger().error(
-                    "Failed to write value %d to I2C device: %s",
-                    value.data,
-                    str(e),
+                error_string = "Failed to write value {} to I2C device: {}".format(
+                    value.data, str(e)
                 )
+                self.get_logger().error(error_string)
 
 
 def main(args=None):
