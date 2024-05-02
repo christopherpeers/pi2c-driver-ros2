@@ -13,7 +13,7 @@ The message used is `std_msgs/msgs/UInt8`.  Values in the range 0 to 15 are sent
 This driver using the Python SMBUS package to interface with the I2C on the RPi.  Install it using:
 
 ```bash
-sudo apt install python3-smbus
+sudo apt install python3-smbus2
 ```
 
 Clone this repo in a ROS2 workspace and then build and run.  See below for example commands:
