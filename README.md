@@ -1,6 +1,7 @@
 # ROS2 driver for a very simple I2C device
 
-The custom I2C device has one register at an address 0x42 that can only be written to with values in the range 0 to 15.  The address can be changed by modifying the code.
+The custom I2C device has one register at an address 0x42 or 0x43 that can only be written to with values in the range 0 to 7.  The address can be changed by modifying the code.
+The ROS2 driver will send data values in the range 0 to 7 to address 0x42 and data values greater that or equal to 8 to address 0x43 after subtracting 8.
 
 ## ROS topic and message
 
