@@ -28,10 +28,13 @@ from std_msgs.msg import UInt8
 
 # Default on RPi is /dev/i2c-1
 I2C_BUS = 1
-# I2C address of the device.
-I2C_ADDRESS = 0x42
-# Maximum value to be written to the I2C device.
+# I2C addresses of devices.
+I2C_ADDRESS_DEVICE_1 = 0x42
+I2C_ADDRESS_DEVICE_2 = 0x43
+# Maximum input value from ROS2.
 MAX_VALUE = 15
+# Maximum value to be written to device 1.
+MAX_VALUE_DEVICE_1 = 8
 
 
 class I2CDriver(Node):
@@ -56,9 +59,14 @@ class I2CDriver(Node):
         else:
             try:
                 with smbus2.SMBus(I2C_BUS) as bus:
-                    bus.write_byte(I2C_ADDRESS, value.data)
+                    if (value.data < MAX_VALUE_DEVICE_1):
+                        i2c_address = I2C_ADDRESS_DEVICE_1
+                    else:
+                        value.data -= MAX_VALUE_DEVICE_1
+                        i2c_address = I2C_ADDRESS_DEVICE_2
+                    bus.write_byte(i2c_address, value.data)
                     info_string = "Written {} to address 0x{:02X}".format(
-                        value.data, I2C_ADDRESS
+                        value.data, i2c_address
                     )
                     self.get_logger().info(info_string)
             except Exception as e:
