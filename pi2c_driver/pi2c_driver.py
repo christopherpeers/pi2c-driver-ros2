@@ -32,10 +32,13 @@ I2C_BUS = 1
 I2C_ADDRESS_DEVICE_1 = 0x42
 I2C_ADDRESS_DEVICE_2 = 0x43
 # Maximum input value from ROS2.
-MAX_VALUE = 15
+MAX_VALUE = 7
 # Maximum value to be written to device 1.
 MAX_VALUE_DEVICE_1 = 8
 
+#0 turns off both
+#1-3 1 to 3 to first
+#4-7 first to 4 and 1-3 to second
 
 class I2CDriver(Node):
     def __init__(self):
@@ -46,25 +49,37 @@ class I2CDriver(Node):
             UInt8, "pi2c", self.callback_send_i2c_message, 10
         )
         info_string = "PI2C started using address 0x{:02X} on I2C bus {}".format(
-            I2C_ADDRESS, I2C_BUS
+            I2C_ADDRESS_DEVICE_1, I2C_BUS
         )
         self.get_logger().info(info_string)
 
     def callback_send_i2c_message(self, value: UInt8):
+        #print(value.data)
         if value.data > MAX_VALUE:
             warning_string = "Value {} exceeds maximum value of {}. Ignoring...".format(
                 value.data, MAX_VALUE
             )
             self.get_logger().warn(warning_string)
+
         else:
             try:
                 with smbus2.SMBus(I2C_BUS) as bus:
-                    if (value.data < MAX_VALUE_DEVICE_1):
-                        i2c_address = I2C_ADDRESS_DEVICE_1
-                    else:
-                        value.data -= MAX_VALUE_DEVICE_1
-                        i2c_address = I2C_ADDRESS_DEVICE_2
-                    bus.write_byte(i2c_address, value.data)
+                    if value.data == 0:
+                        print("1", value.data, "2", value.data)
+                        bus.write_byte(I2C_ADDRESS_DEVICE_1, value.data)
+                        bus.write_byte(I2C_ADDRESS_DEVICE_2, value.data)
+                        
+                    elif value.data >= 1 and value.data <= 3:
+                        print("1", value.data, "2", 0)
+                        bus.write_byte(I2C_ADDRESS_DEVICE_1, value.data)
+                        bus.write_byte(I2C_ADDRESS_DEVICE_2, 0)
+                        
+                    elif value.data >= 4 and value.data <= 7:
+                        print("1", 4, "2", value.data-3)
+                        bus.write_byte(I2C_ADDRESS_DEVICE_1, 4)
+                        bus.write_byte(I2C_ADDRESS_DEVICE_2, value.data-3)
+                        
+                    
                     info_string = "Written {} to address 0x{:02X}".format(
                         value.data, i2c_address
                     )
